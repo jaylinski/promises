@@ -109,5 +109,6 @@ class FulfilledPromiseTest extends TestCase
         $t1 = $fp->then(function ($v) { return $v . ' b'; });
         $t1->resolve('why!');
         $this->assertSame('why!', $t1->wait());
+        P\Utils::queue()->run();
     }
 }

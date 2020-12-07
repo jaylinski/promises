@@ -145,5 +145,6 @@ class RejectedPromiseTest extends TestCase
         $t1 = $fp->then(null, function ($v) { return $v . ' b'; });
         $t1->resolve('why!');
         $this->assertSame('why!', $t1->wait());
+        P\Utils::queue()->run();
     }
 }

@@ -32,22 +32,12 @@ class FulfilledPromise implements PromiseInterface
             return $this;
         }
 
-        $queue = Utils::queue();
-        $p = new Promise([$queue, 'run']);
         $value = $this->value;
-        $queue->add(static function () use ($p, $value, $onFulfilled) {
-            if (Is::pending($p)) {
-                try {
-                    $p->resolve($onFulfilled($value));
-                } catch (\Throwable $e) {
-                    $p->reject($e);
-                } catch (\Exception $e) {
-                    $p->reject($e);
-                }
-            }
-        });
+        $onFulfilledTask = static function () use ($onFulfilled, $value) {
+            return $onFulfilled($value);
+        };
 
-        return $p;
+        return Utils::task($onFulfilledTask);
     }
 
     public function otherwise(callable $onRejected)

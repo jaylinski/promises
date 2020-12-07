@@ -32,25 +32,12 @@ class RejectedPromise implements PromiseInterface
             return $this;
         }
 
-        $queue = Utils::queue();
         $reason = $this->reason;
-        $p = new Promise([$queue, 'run']);
-        $queue->add(static function () use ($p, $reason, $onRejected) {
-            if (Is::pending($p)) {
-                try {
-                    // Return a resolved promise if onRejected does not throw.
-                    $p->resolve($onRejected($reason));
-                } catch (\Throwable $e) {
-                    // onRejected threw, so return a rejected promise.
-                    $p->reject($e);
-                } catch (\Exception $e) {
-                    // onRejected threw, so return a rejected promise.
-                    $p->reject($e);
-                }
-            }
-        });
+        $onRejectedTask = static function () use ($onRejected, $reason) {
+            return $onRejected($reason);
+        };
 
-        return $p;
+        return Utils::task($onRejectedTask);
     }
 
     public function otherwise(callable $onRejected)
